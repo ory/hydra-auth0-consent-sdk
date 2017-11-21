@@ -1,0 +1,32 @@
+version: '2'
+
+services:
+  hydra:
+    image: oryd/hydra:v0.10.0-alpha.18
+    networks:
+      - subnet
+    ports:
+      - "4444:4444"
+      - "4445:4445"
+    environment:
+      - CONSENT_URL=http://localhost:4446
+      - DATABASE_URL=memory
+      - FORCE_ROOT_CLIENT_CREDENTIALS=root:secret
+      - ACCESS_TOKEN_LIFESPAN=1m
+      - ISSUER=http://localhost:4444/
+      - LOG_LEVEL=debug
+    restart: unless-stopped
+    entrypoint: "hydra host --dangerous-force-http"
+
+  consent-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - subnet
+    ports:
+      - "4446:3000"
+
+networks:
+  subnet:
+    driver: bridge

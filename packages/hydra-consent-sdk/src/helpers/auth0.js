@@ -2,11 +2,11 @@
 import Auth0Strategy from 'passport-auth0'
 import { AuthenticationClient } from 'auth0'
 import request from 'superagent'
-import { isEmail } from 'validator'
 import { Strategy as LocalStrategy } from 'passport-local'
 import Profile from 'passport-auth0/lib/Profile'
 import type { Auth0Config, Logger as LoggerType } from "./types";
 import Logger from './logger'
+import type {Passport} from 'passport'
 
 export default class PassportHelper {
   client: AuthenticationClient
@@ -97,7 +97,7 @@ export default class PassportHelper {
     })
   }
 
-  registerPassportStrategies = (passport) => {
+  registerPassportStrategies = (passport: Passport) => {
     const { debug } = this.logger
 
     passport.use(this.createSocialLoginPassportStrategy())

@@ -6,7 +6,6 @@ import express from 'express'
 import request from 'superagent'
 import detect from 'detect-port'
 import http from 'http'
-import uuid from 'uuid'
 import middlewares from './middlewares'
 
 winston.level = 'debug'
@@ -53,7 +52,7 @@ describe('signInStrategy', () => {
       .agent()
       .post(`http://127.0.0.1:${port}/login`)
       .type('form')
-      .send({ username: uuid.v4(), password: 'bar' })
+      .send({ username: '123123123', password: 'bar' })
       .catch(err => {
         expect(err.response.request.url).toEqual(
           `http://127.0.0.1:${port}/failure`

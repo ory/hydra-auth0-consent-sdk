@@ -4,12 +4,13 @@ export type Auth0Config = {
   client: {
     id: string,
     secret: string
-  }
+  },
   callback: string
 }
 
 export type Logger = {
-  debug: (...args: any) => void
-  warn: (...args: any) => void
+  debug: (...args: any) => void,
+  warn: (...args: any) => void,
+  info: (...args: any) => void,
   error: (...args: any) => void
 }

@@ -1,8 +1,6 @@
 // @flow
-import cookieParser from 'cookie-parser'
 import session from 'express-session'
 import flash from 'connect-flash'
-import type { Router } from 'express'
 import type { Passport } from 'passport'
 
 /**
@@ -19,7 +17,6 @@ import type { Passport } from 'passport'
  */
 export default (router: Router, cookieSecret: string, passport: Passport) =>
   [
-    () => cookieParser(),
     () =>
       session({
         secret: cookieSecret,
