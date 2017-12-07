@@ -119,6 +119,10 @@ describe('', () => {
     })
   )
 
+  afterAll(() => {
+    server.close();
+  })
+
   it('should fail consent validation when no consent request was given', () => {
     return request.get(`http://127.0.0.1:${port}/consent`).catch(err => {
       expect(err.status).toEqual(500)
