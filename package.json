@@ -5,7 +5,7 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "start": "lerna run --scope hydra-consent-auth0-example start",
+    "start": "lerna run --scope ory-hydra-auth0-consent-example start",
     "build": "lerna run build",
     "test": "lerna run test",
     "flow": "lerna run flow",

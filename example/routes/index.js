@@ -1,6 +1,6 @@
 var express = require('express');
 var passport = require('passport');
-var consent = require('hydra-consent-sdk');
+var consent = require('ory-hydra-auth0-consent-sdk');
 var csrf = require('csurf');
 var winston = require('winston');
 var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;

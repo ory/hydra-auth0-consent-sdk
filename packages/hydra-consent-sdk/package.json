@@ -1,6 +1,6 @@
 {
-  "name": "hydra-consent-sdk",
-  "version": "0.0.0",
+  "name": "ory-hydra-auth0-consent-sdk",
+  "version": "0.0.1",
   "main": "./lib/index.js",
   "scripts": {
     "build": "babel src --out-dir ./lib --copy-files --ignore .test.js",
