@@ -13,7 +13,7 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/node:9.2
+      - image: circleci/node:8.6
     steps:
       - checkout
       - run: yarn install
@@ -22,6 +22,7 @@ jobs:
       - run: |
           echo "registry=https://registry.npmjs.org/" > ~/.npmrc
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+          npm whoami
           yarn run lerna -- publish --skip-git --repo-version=$(git describe --tag) --yes --force-publish=*
       - run: git add -A
       - run: git commit -a -m "Bump to version $(git describe --tag)"
