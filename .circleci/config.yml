@@ -23,7 +23,8 @@ jobs:
           echo "registry=https://registry.npmjs.org/" > ~/.npmrc
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
           npm whoami
-          yarn run lerna -- publish --skip-git --repo-version=$(git describe --tag) --yes --force-publish=*
+          yarn run lerna publish --skip-git --repo-version=$(git describe --tag) --yes --force-publish=* --skip-npm
+          cd packages/hydra-consent-sdk; npm publish
       - run: git add -A
       - run: git commit -a -m "Bump to version $(git describe --tag)"
       - run: git remote rm origin
