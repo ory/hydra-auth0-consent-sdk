@@ -1,18 +1,18 @@
 var express = require('express');
 var logger = require('morgan');
 var routes = require('./routes/index');
-var initializeMiddleware = require('hydra-consent-sdk').initializeMiddleware;
+var consent = require('ory-hydra-auth0-consent-sdk');
 var path = require('path');
 var passport = require('passport');
-var initializePassport = require('hydra-consent-sdk').initializePassport;
 var winston = require('winston');
 
-winston.level = process.env.LOG_LEVEL
+var initializeMiddleware = consent.initializeMiddleware;
+var initializePassport = consent.initializePassport;
+winston.level = process.env.LOG_LEVEL || 'info';
 initializePassport(passport, winston)
 
 var app = express();
 
-app.locals.basePath = process.env.PUBLIC_URL
 app.locals.pageTitle = 'ORY Hydra Authentication'
 app.locals.redirectUrl = process.env.DEFAULT_REDIRECT_URL
 

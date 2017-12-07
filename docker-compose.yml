@@ -7,7 +7,6 @@ services:
       - subnet
     ports:
       - "4444:4444"
-      - "4445:4445"
     environment:
       - CONSENT_URL=http://localhost:4446/auth/consent
       - DATABASE_URL=memory
@@ -21,11 +20,16 @@ services:
     build:
       context: example/
       dockerfile: Dockerfile
+    networks:
+      - subnet
     environment:
       - AUTH0_CLIENT_ID=${AUTH0_CLIENT_ID}
       - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
       - AUTH0_DOMAIN=${AUTH0_DOMAIN}
-      - AUTH0_CALLBACK_URL=http://localhost:6001/auth/callback
+      - AUTH0_CALLBACK_URL=http://localhost:4446/auth/callback
+      - HYDRA_CLIENT_ID=root
+      - HYDRA_CLIENT_SECRET=secret
+      - HYDRA_URL=http://hydra:4444/
 
     networks:
       - subnet
