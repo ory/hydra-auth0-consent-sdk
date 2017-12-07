@@ -1,0 +1,28 @@
+extends layout
+
+block content
+    .row.justify-content-center.align-items-center(style="height: 100%")
+        .col-sm-6
+            form(method="post")
+                input(type="hidden",name="_csrf",value=csrfToken)
+                .card
+                    .card-body
+                        h4.card-title Authorize application
+                        p.card-text
+                            em #{consentRequest.clientId}
+                            | would like permission to access your account.
+                    ul.list-group.list-group-flush
+                        li.list-group-item Review permissions
+                        each scope in consentRequest.requestedScopes
+                            li.list-group-item
+                                .form-check
+                                    label.form-check-label
+                                        input(type="checkbox",value=scope,name="grantedScopes",checked)
+                                        if scopeDescriptions[scope]
+                                            |  #{scopeDescriptions[scope]}
+                                        else
+                                            |  #{scope}
+                    .card-body
+                        p.card-text.text-center
+                            button.btn.btn-link(type=submit,name="denyAuthorization",value="allow") Deny access
+                            button.btn.btn-primary(type=submit,name="grantAuthorization",value="deny") Authorize application

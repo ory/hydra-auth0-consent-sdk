@@ -2,7 +2,7 @@
   "lerna": "2.0.0",
   "packages": [
     "packages/*",
-    "examples/*"
+    "example"
   ],
   "npmClient": "yarn",
   "version": "0.0.0"

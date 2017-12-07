@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  .row.justify-content-center.align-items-center(style="height: 100%")
+    .col-sm-6
+      .card
+        .card-body
+          if code
+            h4.card-title An error occurred (code #{code})
+          else
+            h4.card-title An error occurred
+          p.card-text #{message}.
+          p.card-text If you are a system administrator, please check the server logs.
+          if error
+            p.card-text
+              pre
+                code #{error.stack.toString()}
+          if redirectUrl
+            a.card-link(href=redirectUrl) Take me back
+          else
+            p.card-text There is nothing you can do but to close this tab.
