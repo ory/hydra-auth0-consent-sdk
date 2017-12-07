@@ -11,6 +11,6 @@
     "flow": "lerna run flow",
     "postinstall": "lerna bootstrap",
     "clean": "lerna clean",
-    "publish": "lerna publish --skip-git --repo-version=$(git describe --tag) --yes --force-publish=*"
+    "lerna": "lerna"
   }
 }
