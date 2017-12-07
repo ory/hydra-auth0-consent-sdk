@@ -1,0 +1,16 @@
+{
+  "devDependencies": {
+    "lerna": "^2.0.0",
+    "npm-run-all": "^4.1.2"
+  },
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "start": "lerna run --scope hydra-consent-auth0-example start",
+    "build": "lerna run build",
+    "test": "lerna run test",
+    "flow": "lerna run flow",
+    "postinstall": "lerna bootstrap",
+    "clean": "lerna clean",
+    "publish": "lerna publish --skip-git --repo-version=$(git describe --tag) --yes --force-publish=*"
+  }
+}
