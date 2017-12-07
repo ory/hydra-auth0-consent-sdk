@@ -1,5 +1,7 @@
 # hydra-consent-app-auth0
 
+[![CircleCI](https://circleci.com/gh/ory/hydra-consent-app-auth0/tree/master.svg?style=shield)](https://circleci.com/gh/ory/hydra-consent-app-auth0/tree/master)
+
 This repository contains a library and an exemplary express application that connects ORY Hydra with Auth0.
 
 
