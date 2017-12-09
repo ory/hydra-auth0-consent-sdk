@@ -182,10 +182,18 @@ var consentHandler = exports.consentHandler = function consentHandler() {
       }
 
       var _r$body = r.body,
-          grantedScopes = _r$body.grantedScopes,
+          bodyScopes = _r$body.grantedScopes,
           grantAuthorization = _r$body.grantAuthorization,
           denyAuthorization = _r$body.denyAuthorization;
 
+      // If only one scope was granted or none at all, this is an (empty) string and not an array.
+
+      var grantedScopes = bodyScopes;
+      if (typeof bodyScopes === 'string') {
+        grantedScopes = [bodyScopes];
+      } else if (!grantedScopes) {
+        grantedScopes = [];
+      }
 
       if (denyAuthorization && denyAuthorization.length > 0) {
         return new Promise(function (resolve, reject) {
