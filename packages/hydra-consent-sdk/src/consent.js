@@ -10,7 +10,7 @@ const errorMissingConsentRequest =
 const hydra = new Hydra.OAuth2Api()
 
 export const consentValidator = (
-  r: $Request & { session: any, user: any, csrfToken: () => string },
+  r: $Request & { session: any, user: Object, csrfToken: () => string },
   w: $Response,
   next: NextFunction
 ) => {
@@ -83,21 +83,40 @@ export const defaultOpenIdConnectHandler: Hydrator = (
         name,
         nickname,
         created_at,
-        updated_at
+        updated_at,
+        gender,
+        given_name,
+        family_name,
+        locale
       } = {}
     } = {}
   } = r
 
   let data: any = {}
+  if (grantedScopes.indexOf('openid') >= 0) {
+    debug('Granting openid scope.', { consent })
+    data = { ...data, name }
+  }
+
   if (grantedScopes.indexOf('profile') >= 0) {
     debug('Granting profile scope.', { consent })
-    data = { picture, name, nickname, created_at, updated_at }
+    data = {
+      ...data,
+      picture,
+      name,
+      nickname,
+      created_at: created_at ? Math.floor(new Date(updated_at).getTime() / 1000) : undefined,
+      updated_at: updated_at ? Math.floor(new Date(updated_at).getTime() / 1000) : undefined,
+      gender,
+      given_name,
+      family_name,
+      locale
+    }
   }
 
   if (grantedScopes.indexOf('email') >= 0) {
     debug('Granting email scope.', { consent })
-    data.email = email
-    data.email_verified = email_verified
+    data = { ...data, email, email_verified }
   }
 
   return Promise.resolve({
@@ -166,7 +185,7 @@ export const consentHandler = (
               error('An error occurred during consent fetching', { consent })
               err.message = `An error ("${
                 err.message
-              }") occurred during consent fetching`
+                }") occurred during consent fetching`
               return reject(err)
             })
           )
@@ -234,7 +253,7 @@ export const consentHandler = (
                 })
                 err.message = `An error ("${
                   err.message
-                }") occurred during consent request rejection`
+                  }") occurred during consent request rejection`
                 reject(err)
               }
             )
@@ -345,7 +364,7 @@ export const consentHandler = (
                   })
                   err.message = `An error ("${
                     err.message
-                  }") occurred during consent request acceptance`
+                    }") occurred during consent request acceptance`
                   reject(err)
                 }
               )
