@@ -120,7 +120,7 @@ describe('', () => {
   )
 
   afterAll(() => {
-    server.close();
+    server.close()
   })
 
   it('should fail consent validation when no consent request was given', () => {

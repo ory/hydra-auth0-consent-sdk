@@ -143,7 +143,11 @@ export const consentHandler = (
     sessionHydrator: Hydrator,
     logger: Logger
   } = {}
-) => (r: $Request & { session: any, user: any, csrfToken: () => string }, w: $Response, next: NextFunction) => {
+) => (
+  r: $Request & { session: any, user: any, csrfToken: () => string },
+  w: $Response,
+  next: NextFunction
+) => {
   const { session: { consent } } = r
   if (!consent) {
     next(new Error(errorMissingConsentRequest))
@@ -160,7 +164,9 @@ export const consentHandler = (
             consent,
             resolver(resolve, (err: Error) => {
               error('An error occurred during consent fetching', { consent })
-              err.message = `An error ("${err.message}") occurred during consent fetching`
+              err.message = `An error ("${
+                err.message
+              }") occurred during consent fetching`
               return reject(err)
             })
           )
@@ -195,7 +201,19 @@ export const consentHandler = (
         return Promise.resolve({ cancel: true })
       }
 
-      const { grantedScopes, grantAuthorization, denyAuthorization } = r.body
+      const {
+        grantedScopes: bodyScopes,
+        grantAuthorization,
+        denyAuthorization
+      } = r.body
+
+      // If only one scope was granted or none at all, this is an (empty) string and not an array.
+      let grantedScopes = bodyScopes
+      if (typeof bodyScopes === 'string') {
+        grantedScopes = [bodyScopes]
+      } else if (!grantedScopes) {
+        grantedScopes = []
+      }
 
       if (denyAuthorization && denyAuthorization.length > 0) {
         return new Promise((resolve, reject) => {
@@ -214,7 +232,9 @@ export const consentHandler = (
                   consent,
                   err
                 })
-                err.message = `An error ("${err.message}") occurred during consent request rejection`
+                err.message = `An error ("${
+                  err.message
+                }") occurred during consent request rejection`
                 reject(err)
               }
             )
@@ -323,7 +343,9 @@ export const consentHandler = (
                     consent,
                     err
                   })
-                  err.message = `An error ("${err.message}") occurred during consent request acceptance`
+                  err.message = `An error ("${
+                    err.message
+                  }") occurred during consent request acceptance`
                   reject(err)
                 }
               )

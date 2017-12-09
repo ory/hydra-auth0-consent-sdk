@@ -52,18 +52,19 @@ export const refreshToken = () =>
     return Promise.resolve(token)
   })
 
-export const retryRefreshToken = () => retry(
-  (r, attempt) => {
-    debug('Attempt', attempt, 'to fetch initial ORY Hydra access token')
+export const retryRefreshToken = () =>
+  retry(
+    (r, attempt) => {
+      debug('Attempt', attempt, 'to fetch initial ORY Hydra access token')
 
-    return refreshToken()
-      .then()
-      .catch(err => {
-        debug('Attempt', attempt, 'failed because:', err.message)
-        return r(err)
-      })
-  },
-  { maxTimeout: 3000, retries: 5, randomize: true }
-)
+      return refreshToken()
+        .then()
+        .catch(err => {
+          debug('Attempt', attempt, 'failed because:', err.message)
+          return r(err)
+        })
+    },
+    { maxTimeout: 3000, retries: 5, randomize: true }
+  )
 
 export default Hydra

@@ -3,7 +3,10 @@ const auth0 = require('./config').auth0
 import Auth0Strategy from 'passport-auth0'
 import winston from 'winston'
 
-export const initialize = (passport: any, logger: { debug(...args: any): void } = winston) => {
+export const initialize = (
+  passport: any,
+  logger: { debug(...args: any): void } = winston
+) => {
   const strategy = new Auth0Strategy(
     {
       domain: auth0.domain,
