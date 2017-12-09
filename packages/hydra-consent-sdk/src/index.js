@@ -9,12 +9,18 @@ import {
 } from './consent'
 import Hydra, { refreshToken, retryRefreshToken } from './hydra'
 import initializeMiddleware from './middlewares'
-import {initialize as initializePassport} from './passport'
+import { initialize as initializePassport } from './passport'
 
 export {
   auth0,
-  consentValidator, defaultOpenIdConnectHandler, defaultScopeDescriptions, defaultScopeRenderer, consentHandler,
-  Hydra, refreshToken, retryRefreshToken,
+  consentValidator,
+  defaultOpenIdConnectHandler,
+  defaultScopeDescriptions,
+  defaultScopeRenderer,
+  consentHandler,
+  Hydra,
+  refreshToken,
+  retryRefreshToken,
   initializeMiddleware,
   initializePassport
 }
