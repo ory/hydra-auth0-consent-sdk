@@ -67,19 +67,37 @@ var defaultOpenIdConnectHandler = exports.defaultOpenIdConnectHandler = function
       name = _r$user$_json.name,
       nickname = _r$user$_json.nickname,
       created_at = _r$user$_json.created_at,
-      updated_at = _r$user$_json.updated_at;
+      updated_at = _r$user$_json.updated_at,
+      gender = _r$user$_json.gender,
+      given_name = _r$user$_json.given_name,
+      family_name = _r$user$_json.family_name,
+      locale = _r$user$_json.locale;
 
 
   var data = {};
+  if (grantedScopes.indexOf('openid') >= 0) {
+    debug('Granting openid scope.', { consent: consent });
+    data = _extends({}, data, { name: name });
+  }
+
   if (grantedScopes.indexOf('profile') >= 0) {
     debug('Granting profile scope.', { consent: consent });
-    data = { picture: picture, name: name, nickname: nickname, created_at: created_at, updated_at: updated_at };
+    data = _extends({}, data, {
+      picture: picture,
+      name: name,
+      nickname: nickname,
+      created_at: created_at ? Math.floor(new Date(updated_at).getTime() / 1000) : undefined,
+      updated_at: updated_at ? Math.floor(new Date(updated_at).getTime() / 1000) : undefined,
+      gender: gender,
+      given_name: given_name,
+      family_name: family_name,
+      locale: locale
+    });
   }
 
   if (grantedScopes.indexOf('email') >= 0) {
     debug('Granting email scope.', { consent: consent });
-    data.email = email;
-    data.email_verified = email_verified;
+    data = _extends({}, data, { email: email, email_verified: email_verified });
   }
 
   return Promise.resolve({
