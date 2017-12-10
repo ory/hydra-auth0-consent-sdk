@@ -8,7 +8,7 @@ const errorMissingConsentRequest =
 
 const hydra = new Hydra.OAuth2Api()
 
-export const consentValidator = ({ logger: { error, debug } }: { logger: { error: (...args: any) => void, debug: (...args: any) => void } } = winston) => (
+export const consentValidator = ({ logger: { error, debug } }: { logger: { error: (...args: any) => void, debug: (...args: any) => void } } = { logger: winston }) => (
   r: $Request & {
     logout(): void,
     session: any,

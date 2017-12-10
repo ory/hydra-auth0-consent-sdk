@@ -61,8 +61,8 @@ describe('', () => {
 
   middlewares(app, passport)
 
-  app.get('/consent', consentValidator, (r, w) => w.json({ validated: true }))
-  app.get('/consent', consentValidator, (r, w) => w.json({ validated: true }))
+  app.get('/consent', consentValidator(), (r, w) => w.json({ validated: true }))
+  app.get('/consent', consentValidator(), (r, w) => w.json({ validated: true }))
 
   app.get(
     '/consent-ui',
