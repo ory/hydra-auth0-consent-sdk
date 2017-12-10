@@ -16,7 +16,10 @@ export const initialize = (
     },
     (accessToken, refreshToken, extraParams, profile, done) => {
       logger.debug('Fetched profile data from Auth0 OAuth2 provider', profile)
-      done(null, profile)
+      done(null, {
+        ...profile,
+        auth_time: Math.floor(new Date().getTime() / 1000)
+      })
     }
   )
 

@@ -10,7 +10,12 @@ const errorMissingConsentRequest =
 const hydra = new Hydra.OAuth2Api()
 
 export const consentValidator = (
-  r: $Request & { session: any, user: Object, csrfToken: () => string },
+  r: $Request & {
+    logout(): void,
+    session: any,
+    user: Object,
+    csrfToken: () => string
+  },
   w: $Response,
   next: NextFunction
 ) => {
@@ -35,6 +40,34 @@ export const consentValidator = (
     return
   }
 
+  refreshToken()
+    .then(
+      () =>
+        new Promise((resolve, reject) =>
+          hydra.getOAuth2ConsentRequest(
+            consent,
+            resolver(resolve, (err: Error) => {
+              error('An error occurred during consent fetching', { consent })
+              err.message = `An error ("${
+                err.message
+              }") occurred during consent fetching`
+              return reject(err)
+            })
+          )
+        )
+    )
+    .then((consentRequest: ConsentRequest) => {
+      if (
+        consentRequest.requestedPrompt === 'login' ||
+        (r.user &&
+          r.user.auth_time &&
+          r.user.auth_time + consentRequest.requestedMaxAge >=
+            new Date().getTime() / 1000)
+      ) {
+        r.logout()
+      }
+    })
+
   r.session.consent = consent
 
   next()
@@ -45,7 +78,10 @@ export type ConsentRequest = {
   expiresAt: string,
   id: string,
   redirectUrl: string,
-  requestedScopes: string[]
+  requestedScopes: string[],
+  requestedMaxAge: number,
+  requestedPrompt: string,
+  requestedAcr: string[]
 }
 
 export type Hydrator = (
@@ -105,8 +141,12 @@ export const defaultOpenIdConnectHandler: Hydrator = (
       picture,
       name,
       nickname,
-      created_at: created_at ? Math.floor(new Date(updated_at).getTime() / 1000) : undefined,
-      updated_at: updated_at ? Math.floor(new Date(updated_at).getTime() / 1000) : undefined,
+      created_at: created_at
+        ? Math.floor(new Date(updated_at).getTime() / 1000)
+        : undefined,
+      updated_at: updated_at
+        ? Math.floor(new Date(updated_at).getTime() / 1000)
+        : undefined,
       gender,
       given_name,
       family_name,
@@ -185,7 +225,7 @@ export const consentHandler = (
               error('An error occurred during consent fetching', { consent })
               err.message = `An error ("${
                 err.message
-                }") occurred during consent fetching`
+              }") occurred during consent fetching`
               return reject(err)
             })
           )
@@ -253,7 +293,7 @@ export const consentHandler = (
                 })
                 err.message = `An error ("${
                   err.message
-                  }") occurred during consent request rejection`
+                }") occurred during consent request rejection`
                 reject(err)
               }
             )
@@ -347,6 +387,7 @@ export const consentHandler = (
               {
                 subject,
                 grantScopes: grantedScopes,
+                authTime: r.user.auth_time,
                 idTokenExtra,
                 accessTokenExtra
               },
@@ -364,7 +405,7 @@ export const consentHandler = (
                   })
                   err.message = `An error ("${
                     err.message
-                    }") occurred during consent request acceptance`
+                  }") occurred during consent request acceptance`
                   reject(err)
                 }
               )
