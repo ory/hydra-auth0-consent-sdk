@@ -71,11 +71,10 @@ export const consentValidator = (
       if (consentRequest.requestedPrompt === 'none' && !r.isAuthenticated()) {
         next(new Error('A application tried to acquire authorization, but you are not signed in'))
       }
-    })
 
-  r.session.consent = consent
-
-  next()
+      r.session.consent = consent
+      next()
+    }).catch(next)
 }
 
 export type ConsentRequest = {
