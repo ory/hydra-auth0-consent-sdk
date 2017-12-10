@@ -44,9 +44,26 @@ var consentValidator = exports.consentValidator = function consentValidator(r, w
     return;
   }
 
-  r.session.consent = consent;
+  (0, _hydra.refreshToken)().then(function () {
+    return new Promise(function (resolve, reject) {
+      return hydra.getOAuth2ConsentRequest(consent, (0, _hydra.resolver)(resolve, function (err) {
+        (0, _winston.error)('An error occurred during consent fetching', { consent: consent });
+        err.message = 'An error ("' + err.message + '") occurred during consent fetching';
+        return reject(err);
+      }));
+    });
+  }).then(function (consentRequest) {
+    if (consentRequest.requestedPrompt === 'login' || r.isAuthenticated() && r.user.auth_time && r.user.auth_time + consentRequest.requestedMaxAge >= new Date().getTime() / 1000) {
+      r.logout();
+    }
 
-  next();
+    if (consentRequest.requestedPrompt === 'none' && !r.isAuthenticated()) {
+      next(new Error('A application tried to acquire authorization, but you are not signed in'));
+    }
+
+    r.session.consent = consent;
+    next();
+  }).catch(next);
 };
 
 var defaultOpenIdConnectHandler = exports.defaultOpenIdConnectHandler = function defaultOpenIdConnectHandler(_ref, r) {
@@ -252,7 +269,8 @@ var consentHandler = exports.consentHandler = function consentHandler() {
       _r$user4 = _r$user4 === undefined ? {} : _r$user4;
       var _r$user4$_json = _r$user4._json;
       _r$user4$_json = _r$user4$_json === undefined ? {} : _r$user4$_json;
-      var sub = _r$user4$_json.sub;
+      var sub = _r$user4$_json.sub,
+          auth_time = _r$user4.auth_time;
 
 
       return sessionHydrator({
@@ -288,6 +306,7 @@ var consentHandler = exports.consentHandler = function consentHandler() {
           hydra.acceptOAuth2ConsentRequest(consent, {
             subject: subject,
             grantScopes: grantedScopes,
+            authTime: auth_time,
             idTokenExtra: idTokenExtra,
             accessTokenExtra: accessTokenExtra
           }, (0, _hydra.resolver)(function () {

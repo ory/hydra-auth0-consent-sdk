@@ -5,6 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.initialize = undefined;
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _passportAuth = require('passport-auth0');
 
 var _passportAuth2 = _interopRequireDefault(_passportAuth);
@@ -26,7 +28,9 @@ var initialize = exports.initialize = function initialize(passport) {
     callbackURL: auth0.callback
   }, function (accessToken, refreshToken, extraParams, profile, done) {
     logger.debug('Fetched profile data from Auth0 OAuth2 provider', profile);
-    done(null, profile);
+    done(null, _extends({}, profile, {
+      auth_time: Math.floor(new Date().getTime() / 1000)
+    }));
   });
 
   passport.use(strategy);
