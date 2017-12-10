@@ -332,7 +332,7 @@ export const consentHandler = (
           return Promise.resolve({ cancel })
         }
 
-        const { user: { _json: { sub } = {} } = {} } = r
+        const { user: { _json: { sub } = {}, auth_time } = {} } = r
 
         return sessionHydrator(
           {
@@ -387,7 +387,7 @@ export const consentHandler = (
               {
                 subject,
                 grantScopes: grantedScopes,
-                authTime: r.user.auth_time,
+                authTime: auth_time,
                 idTokenExtra,
                 accessTokenExtra
               },
