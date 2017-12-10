@@ -1,6 +1,6 @@
 {
   "name": "ory-hydra-auth0-consent-example",
-  "version": "v0.0.8",
+  "version": "v0.0.9",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -14,7 +14,7 @@
     "express": "~4.13.4",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
-    "ory-hydra-auth0-consent-sdk": "^v0.0.8",
+    "ory-hydra-auth0-consent-sdk": "^v0.0.9",
     "passport": "^0.4.0",
     "serve-favicon": "~2.3.0",
     "winston": "^2.4.0"

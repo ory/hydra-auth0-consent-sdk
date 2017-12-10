@@ -9,13 +9,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _winston = require('winston');
-
-var _winston2 = _interopRequireDefault(_winston);
-
 var _hydra = require('./hydra');
 
 var _hydra2 = _interopRequireDefault(_hydra);
+
+var _winston = require('winston');
+
+var _winston2 = _interopRequireDefault(_winston);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23,56 +23,70 @@ var errorMissingConsentRequest = 'The consent flow was requested without a conse
 
 var hydra = new _hydra2.default.OAuth2Api();
 
-var consentValidator = exports.consentValidator = function consentValidator(r, w, next) {
-  var _r$query = r.query,
-      _r$query$consent = _r$query.consent,
-      consent = _r$query$consent === undefined ? r.session.consent : _r$query$consent,
-      err = _r$query.error,
-      errDescription = _r$query.error_description;
+var consentValidator = exports.consentValidator = function consentValidator() {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { logger: _winston2.default },
+      _ref$logger = _ref.logger,
+      error = _ref$logger.error,
+      debug = _ref$logger.debug;
+
+  return function (r, w, next) {
+    var _r$query = r.query,
+        _r$query$consent = _r$query.consent,
+        consent = _r$query$consent === undefined ? r.session.consent : _r$query$consent,
+        err = _r$query.error,
+        errDescription = _r$query.error_description;
 
 
-  if (err) {
-    (0, _winston.error)('The consent flow resulted in an error', {
-      error: err,
-      errorDescription: errDescription
-    });
-    next(new Error(errDescription));
-    return;
-  } else if (!consent) {
-    (0, _winston.error)(errorMissingConsentRequest);
-    next(new Error(errorMissingConsentRequest));
-    return;
-  }
-
-  (0, _hydra.refreshToken)().then(function () {
-    return new Promise(function (resolve, reject) {
-      return hydra.getOAuth2ConsentRequest(consent, (0, _hydra.resolver)(resolve, function (err) {
-        (0, _winston.error)('An error occurred during consent fetching', { consent: consent });
-        err.message = 'An error ("' + err.message + '") occurred during consent fetching';
-        return reject(err);
-      }));
-    });
-  }).then(function (consentRequest) {
-    if (consentRequest.requestedPrompt === 'login' || r.isAuthenticated() && r.user.auth_time && r.user.auth_time + consentRequest.requestedMaxAge >= new Date().getTime() / 1000) {
-      r.logout();
+    if (err) {
+      error('The consent flow resulted in an error', {
+        error: err,
+        errorDescription: errDescription
+      });
+      next(new Error(errDescription));
+      return;
+    } else if (!consent) {
+      error(errorMissingConsentRequest);
+      next(new Error(errorMissingConsentRequest));
+      return;
     }
 
-    if (consentRequest.requestedPrompt === 'none' && !r.isAuthenticated()) {
-      next(new Error('A application tried to acquire authorization, but you are not signed in'));
-    }
+    (0, _hydra.refreshToken)().then(function () {
+      return new Promise(function (resolve, reject) {
+        return hydra.getOAuth2ConsentRequest(consent, (0, _hydra.resolver)(resolve, function (err) {
+          error('An error occurred during consent fetching', { consent: consent });
+          err.message = 'An error ("' + err.message + '") occurred during consent fetching';
+          return reject(err);
+        }));
+      });
+    }).then(function (consentRequest) {
+      debug('Validating consent request', _extends({}, consentRequest));
+      if (consentRequest.requestedPrompt === 'login') {
+        debug('Logging user out because prompt is login', _extends({}, consentRequest));
+        r.logout();
+      }
 
-    r.session.consent = consent;
-    next();
-  }).catch(next);
+      if (r.isAuthenticated() && r.user.auth_time + consentRequest.requestedMaxAge < new Date().getTime() / 1000) {
+        debug('Logging user out because prompt is login', _extends({}, consentRequest));
+        r.logout();
+      }
+
+      if (consentRequest.requestedPrompt === 'none' && !r.isAuthenticated()) {
+        return next(new Error('A application tried to acquire authorization, but you are not signed in'));
+      }
+
+      r.session.consent = consent;
+      next();
+    }).catch(next);
+  };
 };
 
-var defaultOpenIdConnectHandler = exports.defaultOpenIdConnectHandler = function defaultOpenIdConnectHandler(_ref, r) {
-  var consent = _ref.consent,
-      grantedScopes = _ref.grantedScopes,
-      subject = _ref.subject;
+var defaultOpenIdConnectHandler = exports.defaultOpenIdConnectHandler = function defaultOpenIdConnectHandler(_ref2, r) {
+  var consent = _ref2.consent,
+      grantedScopes = _ref2.grantedScopes,
+      subject = _ref2.subject;
 
-  var _ref2 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _winston2.default,
-      debug = _ref2.debug;
+  var _ref3 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _winston2.default,
+      debug = _ref3.debug;
 
   var _r$user = r.user;
   _r$user = _r$user === undefined ? {} : _r$user;
@@ -131,10 +145,10 @@ var defaultScopeDescriptions = exports.defaultScopeDescriptions = {
   offline: 'Application does not have to ask for these permissions again'
 };
 
-var defaultScopeRenderer = exports.defaultScopeRenderer = function defaultScopeRenderer(r, w, _ref3) {
-  var user = _ref3.user,
-      consentRequest = _ref3.consentRequest,
-      csrfToken = _ref3.csrfToken;
+var defaultScopeRenderer = exports.defaultScopeRenderer = function defaultScopeRenderer(r, w, _ref4) {
+  var user = _ref4.user,
+      consentRequest = _ref4.consentRequest,
+      csrfToken = _ref4.csrfToken;
 
   w.render('oauth2-scope-authorization', {
     user: user,
@@ -145,17 +159,17 @@ var defaultScopeRenderer = exports.defaultScopeRenderer = function defaultScopeR
 };
 
 var consentHandler = exports.consentHandler = function consentHandler() {
-  var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref4$scopeRenderer = _ref4.scopeRenderer,
-      scopeRenderer = _ref4$scopeRenderer === undefined ? defaultScopeRenderer : _ref4$scopeRenderer,
-      _ref4$sessionHydrator = _ref4.sessionHydrator,
-      sessionHydrator = _ref4$sessionHydrator === undefined ? defaultOpenIdConnectHandler : _ref4$sessionHydrator,
-      _ref4$logger = _ref4.logger;
+  var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref5$scopeRenderer = _ref5.scopeRenderer,
+      scopeRenderer = _ref5$scopeRenderer === undefined ? defaultScopeRenderer : _ref5$scopeRenderer,
+      _ref5$sessionHydrator = _ref5.sessionHydrator,
+      sessionHydrator = _ref5$sessionHydrator === undefined ? defaultOpenIdConnectHandler : _ref5$sessionHydrator,
+      _ref5$logger = _ref5.logger;
 
-  _ref4$logger = _ref4$logger === undefined ? _winston2.default : _ref4$logger;
-  var debug = _ref4$logger.debug,
-      error = _ref4$logger.error,
-      warn = _ref4$logger.warn;
+  _ref5$logger = _ref5$logger === undefined ? _winston2.default : _ref5$logger;
+  var debug = _ref5$logger.debug,
+      error = _ref5$logger.error,
+      warn = _ref5$logger.warn;
   return function (r, w, next) {
     var consent = r.session.consent;
 
@@ -256,10 +270,10 @@ var consentHandler = exports.consentHandler = function consentHandler() {
         error('Authorization was neither granted nor denied, make sure that your form includes grantedScopes, grantAuthorization, denyAuthorization and that grantedScopes is an array');
         return Promise.reject(new Error('Authorization was neither granted nor denied'));
       }
-    }).then(function (_ref5) {
-      var cancel = _ref5.cancel,
-          grantedScopes = _ref5.grantedScopes,
-          consentRequest = _ref5.consentRequest;
+    }).then(function (_ref6) {
+      var cancel = _ref6.cancel,
+          grantedScopes = _ref6.grantedScopes,
+          consentRequest = _ref6.consentRequest;
 
       if (cancel) {
         return Promise.resolve({ cancel: cancel });
@@ -278,10 +292,10 @@ var consentHandler = exports.consentHandler = function consentHandler() {
         consentRequest: consentRequest,
         consent: consent,
         grantedScopes: grantedScopes
-      }, r, { debug: debug, warn: warn, error: error }).then(function (_ref6) {
-        var idTokenExtra = _ref6.idTokenExtra,
-            accessTokenExtra = _ref6.accessTokenExtra,
-            subject = _ref6.subject;
+      }, r, { debug: debug, warn: warn, error: error }).then(function (_ref7) {
+        var idTokenExtra = _ref7.idTokenExtra,
+            accessTokenExtra = _ref7.accessTokenExtra,
+            subject = _ref7.subject;
 
         if (!subject || subject.length === 0) {
           debug('No subject identifier was given, you probably forgot to return the subject in your session hydrator', { consent: consent });
