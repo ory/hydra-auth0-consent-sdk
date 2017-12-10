@@ -14,7 +14,8 @@ export const consentValidator = (
     logout(): void,
     session: any,
     user: Object,
-    csrfToken: () => string
+    csrfToken: () => string,
+    isAuthenticated: any
   },
   w: $Response,
   next: NextFunction
@@ -59,12 +60,16 @@ export const consentValidator = (
     .then((consentRequest: ConsentRequest) => {
       if (
         consentRequest.requestedPrompt === 'login' ||
-        (r.user &&
+        (r.isAuthenticated() &&
           r.user.auth_time &&
           r.user.auth_time + consentRequest.requestedMaxAge >=
             new Date().getTime() / 1000)
       ) {
         r.logout()
+      }
+
+      if (consentRequest.requestedPrompt === 'none' && !r.isAuthenticated()) {
+        next(new Error('A application tried to acquire authorization, but you are not signed in'))
       }
     })
 
