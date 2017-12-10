@@ -1,5 +1,4 @@
 // @flow
-import { debug, error, warn } from 'winston'
 import Hydra, { refreshToken, resolver } from './hydra'
 import type { $Request, $Response, NextFunction } from 'express'
 import winston from 'winston'
@@ -9,7 +8,7 @@ const errorMissingConsentRequest =
 
 const hydra = new Hydra.OAuth2Api()
 
-export const consentValidator = (
+export const consentValidator = ({ logger: { error, debug } }: { logger: { error: (...args: any) => void, debug: (...args: any) => void } } = winston) => (
   r: $Request & {
     logout(): void,
     session: any,
@@ -51,25 +50,26 @@ export const consentValidator = (
               error('An error occurred during consent fetching', { consent })
               err.message = `An error ("${
                 err.message
-              }") occurred during consent fetching`
+                }") occurred during consent fetching`
               return reject(err)
             })
           )
         )
     )
     .then((consentRequest: ConsentRequest) => {
-      if (
-        consentRequest.requestedPrompt === 'login' ||
-        (r.isAuthenticated() &&
-          r.user.auth_time &&
-          r.user.auth_time + consentRequest.requestedMaxAge >=
-            new Date().getTime() / 1000)
-      ) {
+      debug('Validating consent request', { ...consentRequest })
+      if (consentRequest.requestedPrompt === 'login') {
+        debug('Logging user out because prompt is login', { ...consentRequest })
+        r.logout()
+      }
+
+      if (r.isAuthenticated() && r.user.auth_time + consentRequest.requestedMaxAge < new Date().getTime() / 1000) {
+        debug('Logging user out because prompt is login', { ...consentRequest })
         r.logout()
       }
 
       if (consentRequest.requestedPrompt === 'none' && !r.isAuthenticated()) {
-        next(new Error('A application tried to acquire authorization, but you are not signed in'))
+        return next(new Error('A application tried to acquire authorization, but you are not signed in'))
       }
 
       r.session.consent = consent
@@ -229,7 +229,7 @@ export const consentHandler = (
               error('An error occurred during consent fetching', { consent })
               err.message = `An error ("${
                 err.message
-              }") occurred during consent fetching`
+                }") occurred during consent fetching`
               return reject(err)
             })
           )
@@ -297,7 +297,7 @@ export const consentHandler = (
                 })
                 err.message = `An error ("${
                   err.message
-                }") occurred during consent request rejection`
+                  }") occurred during consent request rejection`
                 reject(err)
               }
             )
@@ -409,7 +409,7 @@ export const consentHandler = (
                   })
                   err.message = `An error ("${
                     err.message
-                  }") occurred during consent request acceptance`
+                    }") occurred during consent request acceptance`
                   reject(err)
                 }
               )

@@ -58,7 +58,9 @@ router.get(
 router.use('/auth/consent',
   // First we need to make sure that the consent request is valid. Additionally, this stores the consent request id
   // in the user's session.
-  consentValidator,
+  consentValidator({
+    logger: winston
+  }),
 
   // This endpoint must not be accessible without being signed in!
   ensureLoggedIn('/auth/login'),
