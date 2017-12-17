@@ -29,7 +29,8 @@ router.get(
     redirectUri: auth0.callback,
     responseType: 'code',
     audience: 'https://' + auth0.domain + '/userinfo',
-    scope
+    scope,
+    prompt: 'login'
   }),
 
   // In our case, we want to redirect the user to the consent endpoint.

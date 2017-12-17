@@ -40,41 +40,8 @@ export const consentValidator = ({ logger: { error, debug } }: { logger: { error
     return
   }
 
-  refreshToken()
-    .then(
-      () =>
-        new Promise((resolve, reject) =>
-          hydra.getOAuth2ConsentRequest(
-            consent,
-            resolver(resolve, (err: Error) => {
-              error('An error occurred during consent fetching', { consent })
-              err.message = `An error ("${
-                err.message
-                }") occurred during consent fetching`
-              return reject(err)
-            })
-          )
-        )
-    )
-    .then((consentRequest: ConsentRequest) => {
-      debug('Validating consent request', { ...consentRequest })
-      if (consentRequest.requestedPrompt === 'login') {
-        debug('Logging user out because prompt is login', { ...consentRequest })
-        r.logout()
-      }
-
-      if (r.isAuthenticated() && r.user.auth_time + consentRequest.requestedMaxAge < new Date().getTime() / 1000) {
-        debug('Logging user out because prompt is login', { ...consentRequest })
-        r.logout()
-      }
-
-      if (consentRequest.requestedPrompt === 'none' && !r.isAuthenticated()) {
-        return next(new Error('A application tried to acquire authorization, but you are not signed in'))
-      }
-
-      r.session.consent = consent
-      next()
-    }).catch(next)
+  r.session.consent = consent
+  next()
 }
 
 export type ConsentRequest = {
